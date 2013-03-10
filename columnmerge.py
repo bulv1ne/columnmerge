@@ -12,17 +12,23 @@ class Column:
         self.locked = False
 
 def iter_column(data):
-    columns = map(Column, data)
     def _iter(columns):
         for column in columns:
+            # If locked, skip this column
             if column.locked:
                 continue
             # Automatic lock and unlock column
             with column:
                 for row in column.rows:
+                    # Return self
                     yield (row,)
+                    # Get underlaying columns also
                     for i in _iter(columns):
+                        # Return self + followers
                         yield (row,) + i
+    # Convert data into columns
+    columns = map(Column, data)
+    # Return the generator
     return _iter(columns)
 
 
